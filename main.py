@@ -40,7 +40,7 @@ def analyze_endpoint():
 
     audio_file = request.files['audio_file']
     audio_file_in_memory = io.BytesIO(audio_file.read())
-    audio, sr = librosa.load(audio_file_in_memory, sr=16000)  # Load directly with desired sample rate
+    audio, sampling_rate = librosa.load(audio_file_in_memory, sr=16000)  # Load directly with desired sample rate
 
     # Define thresholds and target length for audio processing
     min_rms_threshold = 0.01
@@ -48,7 +48,7 @@ def analyze_endpoint():
     target_length = 16000  # One second of audio
 
     intervals = librosa.effects.split(audio, top_db=40)  # Example threshold
-    results = analyze_segments(audio, intervals, sr, class_names, label_groups, special_labels, model, target_length, min_rms_threshold, min_pitch_prob_threshold)
+    results = analyze_segments(audio, intervals, sampling_rate, class_names, label_groups, special_labels, model, target_length, min_rms_threshold, min_pitch_prob_threshold)
     results = json.dumps(results, cls=CustomJSONEncoder)
 
     return Response(results, mimetype='application/json')  # Return analysis results in json format
