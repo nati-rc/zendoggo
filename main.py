@@ -1,4 +1,4 @@
-from flask import Flask, request, Response, jsonify
+from flask import Flask, request, Response, jsonify, render_template
 import io
 import librosa
 from model_utils import load_model
@@ -21,7 +21,7 @@ class CustomJSONEncoder(json.JSONEncoder):
 
 app = Flask(__name__)
 # Constants
-model_url = 'https://www.kaggle.com/models/google/yamnet/tensorFlow2/yamnet/1'
+model_url = 'https://tfhub.dev/google/yamnet/1'
 
 # Load model
 model = load_model(model_url)
