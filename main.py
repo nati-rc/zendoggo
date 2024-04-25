@@ -71,6 +71,11 @@ with open('yamnet_class_map.csv', 'r') as f:
     for row in reader:
         class_names.append(row[2])
 
+#Calling the Front End
+@app.route('/')
+def index():
+    return render_template('index.html')
+
 @app.route('/analyze', methods=['POST'])
 def analyze_endpoint():
     if 'audio_file' not in request.files:
@@ -87,14 +92,33 @@ def analyze_endpoint():
 
     intervals = librosa.effects.split(audio, top_db=40)  # Example threshold
     results = analyze_segments(audio, intervals, sampling_rate, class_names, label_groups, special_labels, model, target_length, min_rms_threshold, min_pitch_prob_threshold)
-    results = json.dumps(results, cls=CustomJSONEncoder)
+    results_json = json.dumps(results, cls=CustomJSONEncoder)
 
     #Gemini API Response
     convo = model_genai.start_chat(history=[])
-    convo.send_message(results)
+    convo.send_message(results_json)
     gemini_response = convo.last.text  # Get the response from Gemini
 
-    return Response(gemini_response, mimetype='application/json')  # Return analysis results in json format
+    def clean_json_response(gemini_response):
+        # Check if the response starts with Markdown code block marker for JSON
+        gemini_response = gemini_response.strip()  # Remove any leading/trailing whitespace
+        if (gemini_response.startswith("```json")):
+            gemini_response = gemini_response[len("```json"):].strip()
+        if gemini_response.endswith("```"):
+            gemini_response = gemini_response[:-len("```")].strip()
+        return gemini_response
+
+    clean_gemini_response = clean_json_response(gemini_response)
+    dict_gemini_response = json.loads(clean_gemini_response)
+
+    combined_json_response = {
+        'analysis_results': results,
+        'gemini_response': dict_gemini_response
+    }
+    combined_json_response = json.dumps(combined_json_response, cls=CustomJSONEncoder)
+
+    return combined_json_response
+    #return Response(gemini_response, mimetype='application/json')  # Return analysis results in json format
 
 if __name__ == '__main__':
     app.run(debug=True)  # Turn off debug in production
