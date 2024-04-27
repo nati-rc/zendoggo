@@ -7,7 +7,7 @@ from collections import defaultdict
 def process_scores(scores, class_names, label_groups, special_labels):
     """
     Process model scores to group them by label_groups and handle special_labels. Special labels have a unique logic
-    based ang get added to a group if either Dog, Cat or Bird sounds have been detected.
+    and get added to a group if either Dog, Cat or Bird sounds have been detected.
     """
     group_scores = defaultdict(float)
     for idx, score in enumerate(scores[0]):
@@ -36,7 +36,10 @@ def process_scores(scores, class_names, label_groups, special_labels):
     return group_scores
 
 def analyze_segments(audio, intervals, sampling_rate, class_names, label_groups, special_labels, model, target_length, min_rms_threshold, min_pitch_prob_threshold):
-
+    """
+        Using librosa to analyze the audio and detect segments with sound based on provided thresholds.
+        Then these segments are sent to the YAMNET model to categorize the sounds.
+    """
     results = {'segments': [], 'total_audio_length_seconds': len(audio) / sampling_rate}
 
     for i, (start_idx, end_idx) in enumerate(intervals):
@@ -60,7 +63,8 @@ def analyze_segments(audio, intervals, sampling_rate, class_names, label_groups,
         filtered_scores = {group: score for group, score in group_scores.items() if score >= 0.10}
         if filtered_scores:
             highest_category = max(filtered_scores, key=filtered_scores.get)
-            #highest_score = filtered_scores[highest_category]
+            # highest_score variable can be added for troubleshooting purpose.
+            # highest_score = filtered_scores[highest_category]
             results['segments'].append({'start_time': start_time, 'end_time': end_time, 'category': highest_category}) # add 'score': highest_score for debugging if needed
 
     return results

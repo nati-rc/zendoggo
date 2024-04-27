@@ -26,15 +26,14 @@ model_url = 'https://tfhub.dev/google/yamnet/1'
 # Load model
 model = load_model(model_url)
 
-#Load GeminiAPI key
+#Load GeminiAPI key that is located on config.json
 with open('config.json') as config_file:
     config = json.load(config_file)
     gemini_api_key = config['gemini_api_key']
 
 genai.configure(api_key=gemini_api_key)
 
-#SETTING UP GEMINI API
-# Set up the generation configuration and system instruction
+# Set Up of Gemini API along with configuration and system instructions
 generation_config = {
     "temperature": 1,
     "top_p": 0.95,
@@ -63,7 +62,9 @@ model_genai = genai.GenerativeModel(model_name="gemini-1.5-pro-latest",
                               system_instruction=system_instruction,
                               safety_settings=safety_settings)
 
-# Load class names
+# Loading class names that will be used for the sound categorization.
+# "yamnet_class_map.csv" is included in repository but latest file can be found in
+# https://github.com/tensorflow/models/blob/master/research/audioset/yamnet/yamnet_class_map.csv
 class_names = []
 with open('yamnet_class_map.csv', 'r') as f:
     reader = csv.reader(f, delimiter=',')
@@ -71,11 +72,12 @@ with open('yamnet_class_map.csv', 'r') as f:
     for row in reader:
         class_names.append(row[2])
 
-#Calling the Front End
+# GET /: Serves the front-end application
 @app.route('/')
 def index():
     return render_template('index.html')
 
+#POST /analyze: Endpoint for uploading audio files and receiving analysis.
 @app.route('/analyze', methods=['POST'])
 def analyze_endpoint():
     if 'audio_file' not in request.files:
@@ -85,20 +87,22 @@ def analyze_endpoint():
     audio_file_in_memory = io.BytesIO(audio_file.read())
     audio, sampling_rate = librosa.load(audio_file_in_memory, sr=16000)  # Load directly with desired sample rate
 
-    # Define thresholds and target length for audio processing
+    # Define thresholds and target length for audio processing. These thresholds are used to omit low background noises
     min_rms_threshold = 0.01
     min_pitch_prob_threshold = 0.005
     target_length = 16000  # One second of audio
+    intervals = librosa.effects.split(audio, top_db=40)
 
-    intervals = librosa.effects.split(audio, top_db=40)  # Example threshold
+    # We call our main analyze function
     results = analyze_segments(audio, intervals, sampling_rate, class_names, label_groups, special_labels, model, target_length, min_rms_threshold, min_pitch_prob_threshold)
     results_json = json.dumps(results, cls=CustomJSONEncoder)
 
-    #Gemini API Response
+    # Gemini API Response
     convo = model_genai.start_chat(history=[])
     convo.send_message(results_json)
-    gemini_response = convo.last.text  # Get the response from Gemini
+    gemini_response = convo.last.text
 
+# Gemini JSON response currently includes markdown so these need to be removed to get a valid JSON
     def clean_json_response(gemini_response):
         # Check if the response starts with Markdown code block marker for JSON
         gemini_response = gemini_response.strip()  # Remove any leading/trailing whitespace
@@ -118,7 +122,6 @@ def analyze_endpoint():
     combined_json_response = json.dumps(combined_json_response, cls=CustomJSONEncoder)
 
     return combined_json_response
-    #return Response(gemini_response, mimetype='application/json')  # Return analysis results in json format
 
 if __name__ == '__main__':
     app.run(debug=True)  # Turn off debug in production
