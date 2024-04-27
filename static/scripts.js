@@ -11,7 +11,7 @@ document.getElementById('audioForm').addEventListener('submit', function(event) 
         document.querySelector('.spinner-border').style.display = 'none'; // Hide spinner
         const results = data.analysis_results;
         const geminiResults = data.gemini_response;
-        const totalAudioLength = 'Total Audio Length: ' + data.total_audio_length_seconds + ' seconds';
+        const totalAudioLength = 'Total Audio Length: ' + results.total_audio_length_seconds + ' seconds'; // Corrected path to access total_audio_length_seconds
         let tableHtml = '<h3>Sounds Detected</h3><div class="scrollable-table"><table class="table"><thead><tr><th>Start Time</th><th>End Time</th><th>Category</th></tr></thead><tbody>';
 
         for (const segment of results.segments) {
@@ -35,3 +35,4 @@ document.getElementById('audioForm').addEventListener('submit', function(event) 
         document.getElementById('results').innerHTML = '<div class="alert alert-danger">Error: ' + error.toString() + '</div>';
     });
 });
+
