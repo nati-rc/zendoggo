@@ -70,3 +70,6 @@ where you can upload audio files and receive the analysis results.
 The latest version can be found on the official TensorFlow Models repository: https://github.com/tensorflow/models/blob/master/research/audioset/yamnet/yamnet_class_map.csv
 - TensorFlow Hub: The environment variable TFHUB_MODEL_LOAD_FORMAT is set to "UNCOMPRESSED" to instruct TensorFlow Hub to fetch models directly from remote storage, potentially improving efficiency.
 
+## Future Improvements
+- Scalability: Implement audio streaming to efficiently process larger files, enabling the app to handle longer recordings typical of production environments.
+- Model Refinement: Train the Gemini model on datasets with labeled examples of separation anxiety. This will enhance the accuracy of insights and suggestions for addressing this specific issue.
