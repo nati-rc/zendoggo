@@ -15,15 +15,20 @@ document.getElementById('audioForm').addEventListener('submit', function(event) 
         let tableHtml = '<h3>Audio Breakdown</h3><div class="scrollable-table"><table class="table"><thead><tr><th>Start Time</th><th>End Time</th><th>Category</th></tr></thead><tbody>';
 
         for (const segment of results.segments) {
-            const rowClass = segment.category === 'Dog' ? 'dog-row' : '';
-            tableHtml += `<tr class="${rowClass}"><td>${segment.start_time.toFixed(2)}s</td><td>${segment.end_time.toFixed(2)}s</td><td>${segment.category}</td></tr>`;
+            tableHtml += `<tr><td>${segment.start_time.toFixed(2)}s</td><td>${segment.end_time.toFixed(2)}s</td><td>${segment.category}</td></tr>`;
         }
 
         tableHtml += '</tbody></table></div>';
         let geminiHtml = `<div class='gemini-results'><h3>Analysis</h3><p><strong>Summary: </strong>${geminiResults["Percentage Distribution"]}</p><p><strong>Insights: </strong> ${geminiResults["Summary"]}</p><h4>Suggestions:</h4><ul>`;
 
-        for (let suggestion of geminiResults["Suggestions"]) {
-            geminiHtml += `<li>${suggestion}</li>`;
+        if (Array.isArray(geminiResults["Suggestions"])) {
+            geminiResults["Suggestions"].forEach(suggestion => {
+                geminiHtml += `<li>${suggestion}</li>`;
+            });
+        } else {
+            Object.keys(geminiResults["Suggestions"]).forEach(key => {
+                geminiHtml += `<li>${geminiResults["Suggestions"][key]}</li>`;
+            });
         }
 
         geminiHtml += '</ul></div>';

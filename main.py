@@ -38,7 +38,8 @@ generation_config = {
     "temperature": 1,
     "top_p": 0.95,
     "top_k": 0,
-    "max_output_tokens": 8192
+    "max_output_tokens": 8192,
+    #"response_mime_type": "application/json",
 }
 
 safety_settings = [{
@@ -55,7 +56,7 @@ safety_settings = [{
     "threshold": "BLOCK_MEDIUM_AND_ABOVE"
 }]
 
-system_instruction = "I built an app to analyze sounds, specifically determines dog barking sounds when a dog is left alone at home. The results are in json format consisting of (Start Time in seconds , End Time in seconds, Category). I am only sharing the segments that had sound, silent segments are excluded.\n\nHere is a short description of the categories:\nDog: Canine vocalizations including barks, howls, whines, growls, and panting.\nCat: Feline sounds including purrs, meows, hisses, and caterwauls.\nBird: Chirps, squawks, songs, and wing flapping associated with birds.\nLivestock and Wildlife: Sounds from farm animals (cows, pigs, etc.), wild animals (roars, howls), and smaller creatures like rodents.\nHuman Speech: Spoken words, conversations, and vocal expressions like narration.\nHuman Sound: Non-speech vocalizations like shouts, laughter, crying, coughs, sneezes, and other bodily sounds.\nMusical Instruments and Sounds: Sounds produced by musical instruments, singing, and different musical genres.\nNature: Natural sounds like animals (birds, insects, frogs), water, wind, and weather events.\nVehicle: Sounds from cars, trucks, trains, aircraft, and other modes of transportation.\nHousehold Sound: Common sounds found in homes, including appliances, doors, and everyday objects.\nOutdoor Sound: Ambient noises characteristic of outdoor environments, both rural and urban.\nSilence: The absence of detectable sound.\nHuman Activity: Non-vocal human sounds like footsteps, clapping, chewing, and bodily functions.\nMusic: Organized sounds with melody, rhythm, and often vocals, spanning various genres and styles.\nWeather: Sounds associated with weather phenomena like wind, rain, and thunderstorms.\nConstruction: Sounds of tools, machinery, and activities characteristic of construction sites.\n\nGenerate a summary analyzing the audio content, highlighting any interesting patterns or insights you can identify, include the percent of time the dog barked, vs. silence, vs, other noise . Give suggestion for decreasing the barking based on the analysis done, if the dog doesn't bark or barks a few then just give complimentary remarks and ways to maintain the good behavior. \n\nFor the summary consider the following questions to help with the analysis:\n\"Were there any long stretches of continuous barking?\"\n\"Did the dog's barking coincide with any other specific sounds?\"\n\"Were there any periods where the barking seemed particularly intense?\"\n\nFor the suggestions consider mentioning to look at other signs of separation anxiety such as:\nDestructive behavior: Chewing, scratching, etc.\nElimination issues: Urinating or defecating indoors.\nPacing, restlessness: Inability to settle.\n\nThreshold for separation anxiety.  If barking exceeds 40% of the audio with no clear triggers, separation anxiety becomes more likely. This applies to audio segments that are 15min or longer. For shorter segments you can still use this but give the disclaimer that the audio is too short and is better to at least have a 15min audio.\n\n\nReturn your results in JSON format:\nPercentage Distribution: (1-2 lines)\nSummary: (small paragraph)\nSuggestions:  (3-4 bullet points)\n\n"
+system_instruction = "I built an app to analyze sounds, specifically determines dog barking sounds when a dog is left alone at home. The results are in json format consisting of (Start Time in seconds , End Time in seconds, Category). I am only sharing the segments that had sound, silent segments are excluded.\n\nHere is a short description of the categories:\nDog: Canine vocalizations including barks, howls, whines, growls, and panting.\nCat: Feline sounds including purrs, meows, hisses, and caterwauls.\nBird: Chirps, squawks, songs, and wing flapping associated with birds.\nLivestock and Wildlife: Sounds from farm animals (cows, pigs, etc.), wild animals (roars, howls), and smaller creatures like rodents.\nHuman Speech: Spoken words, conversations, and vocal expressions like narration.\nHuman Sound: Non-speech vocalizations like shouts, laughter, crying, coughs, sneezes, and other bodily sounds.\nMusical Instruments and Sounds: Sounds produced by musical instruments, singing, and different musical genres.\nNature: Natural sounds like animals (birds, insects, frogs), water, wind, and weather events.\nVehicle: Sounds from cars, trucks, trains, aircraft, and other modes of transportation.\nHousehold Sound: Common sounds found in homes, including appliances, doors, and everyday objects.\nOutdoor Sound: Ambient noises characteristic of outdoor environments, both rural and urban.\nSilence: The absence of detectable sound.\nHuman Activity: Non-vocal human sounds like footsteps, clapping, chewing, and bodily functions.\nMusic: Organized sounds with melody, rhythm, and often vocals, spanning various genres and styles.\nWeather: Sounds associated with weather phenomena like wind, rain, and thunderstorms.\nConstruction: Sounds of tools, machinery, and activities characteristic of construction sites.\n\nGenerate a summary analyzing the audio content, highlighting any interesting patterns or insights you can identify, include the percent of time the dog barked, vs. silence, vs, other noise . Give suggestion for decreasing the barking based on the analysis done, if the dog doesn't bark or barks a few then just give complimentary remarks and ways to maintain the good behavior. Don't forget to mention to encourage users to consult a veterinarian for professional evaluation.\n\nFor the summary consider the following questions to help with the analysis:\n\"Were there any long stretches of continuous barking?\"\n\"Did the dog's barking coincide with any other specific sounds?\"\n\"Were there any periods where the barking seemed particularly intense?\"\n\nFor the suggestions consider mentioning to look at other signs of separation anxiety such as:\nDestructive behavior: Chewing, scratching, etc.\nElimination issues: Urinating or defecating indoors.\nPacing, restlessness: Inability to settle.\n\nThreshold for separation anxiety.  If barking exceeds 20% of the audio with no clear triggers, separation anxiety becomes more likely. This applies to audio segments that are 15min or longer. For shorter segments you can still use this but give the disclaimer that the audio is too short and is better to at least have a 15min audio.\n\n\nReturn your results in JSON format without any other markdown:\nPercentage Distribution: (1-2 lines)\nSummary: (small paragraph)\nSuggestions:  (3-4 bullet points)\n\n"
 
 model_genai = genai.GenerativeModel(model_name="gemini-1.5-pro-latest",
                               generation_config=generation_config,
@@ -88,10 +89,10 @@ def analyze_endpoint():
     audio, sampling_rate = librosa.load(audio_file_in_memory, sr=16000)  # Load directly with desired sample rate
 
     # Define thresholds and target length for audio processing. These thresholds are used to omit low background noises
-    min_rms_threshold = 0.05
-    min_pitch_prob_threshold = 0.007
+    min_rms_threshold = 0.01
+    min_pitch_prob_threshold = 0.005
     target_length = 16000  # One second of audio
-    intervals = librosa.effects.split(audio, top_db=35)
+    intervals = librosa.effects.split(audio, top_db=37)
 
     # We call our main analyze function
     results = analyze_segments(audio, intervals, sampling_rate, class_names, label_groups, special_labels, model, target_length, min_rms_threshold, min_pitch_prob_threshold)
@@ -120,6 +121,7 @@ def analyze_endpoint():
         'gemini_response': dict_gemini_response
     }
     combined_json_response = json.dumps(combined_json_response, cls=CustomJSONEncoder)
+    print(combined_json_response)
     return combined_json_response
 
 if __name__ == '__main__':
