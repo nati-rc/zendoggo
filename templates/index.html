@@ -10,12 +10,12 @@
 <body>
     <div class="container">
         <div class="analysis-box">
-            <h1>ZenDoggo</h1>
-            <h2>An app that helps dog owners train pups for alone time! Analyzes barks & uses ML to report on doggy behavior. #doganxiety</h2>
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="ZenDoggo Logo" class="logo">
+            <h2>An app that helps dog owners train pups for alone time!<br>Analyzes barks & uses ML to report on doggy behavior.</h2>
             <div class="steps">
-                <p><span class="step">Step 1:</span> Upload your audio file with your dog's sounds.</p>
-                <p><span class="step">Step 2:</span> Click 'Analyze' to submit the file for processing.</p>
-                <p><span class="step">Step 3:</span> Review the analysis and insights about your dog's behavior.</p>
+                <p><span class="step">Step 1:</span> Upload your dog's audio file.</p>
+                <p><span class="step">Step 2:</span> Click 'Analyze' for the inside scoop.</p>
+                <p><span class="step">Step 3:</span> Get insights into your pup's soundscape.</p>
             </div>
             <form id="audioForm" action="/analyze" method="post" enctype="multipart/form-data">
                 <input type="file" name="audio_file" required>

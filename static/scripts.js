@@ -11,8 +11,8 @@ document.getElementById('audioForm').addEventListener('submit', function(event) 
         document.querySelector('.spinner-border').style.display = 'none'; // Hide spinner
         const results = data.analysis_results;
         const geminiResults = data.gemini_response;
-        const totalAudioLength = 'Total Audio Length: ' + results.total_audio_length_seconds + ' seconds'; // Corrected path to access total_audio_length_seconds
-        let tableHtml = '<h3>Sounds Detected</h3><div class="scrollable-table"><table class="table"><thead><tr><th>Start Time</th><th>End Time</th><th>Category</th></tr></thead><tbody>';
+        const totalAudioLength = 'Total Audio Length: ' + results.total_audio_length_seconds + ' seconds';
+        let tableHtml = '<h3>Audio Breakdown</h3><div class="scrollable-table"><table class="table"><thead><tr><th>Start Time</th><th>End Time</th><th>Category</th></tr></thead><tbody>';
 
         for (const segment of results.segments) {
             const rowClass = segment.category === 'Dog' ? 'dog-row' : '';
@@ -20,7 +20,7 @@ document.getElementById('audioForm').addEventListener('submit', function(event) 
         }
 
         tableHtml += '</tbody></table></div>';
-        let geminiHtml = `<div class='gemini-results'><h3>Gemini Analysis</h3><p>${geminiResults["Percentage Distribution"]}</p><p><strong>Summary:</strong> ${geminiResults["Summary"]}</p><h4>Suggestions:</h4><ul>`;
+        let geminiHtml = `<div class='gemini-results'><h3>Analysis</h3><p><strong>Summary: </strong>${geminiResults["Percentage Distribution"]}</p><p><strong>Insights: </strong> ${geminiResults["Summary"]}</p><h4>Suggestions:</h4><ul>`;
 
         for (let suggestion of geminiResults["Suggestions"]) {
             geminiHtml += `<li>${suggestion}</li>`;
