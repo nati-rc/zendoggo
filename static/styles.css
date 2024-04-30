@@ -68,6 +68,13 @@ form {
     border-radius: 30px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
+.disclosure{
+    font-size: 0.8rem;
+    margin-top: 15px;
+    font-style: italic;
+    text-align: center;
+    color: #333333;
+}
 #results {
     margin-top: 20px;
 }
