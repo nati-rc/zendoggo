@@ -65,6 +65,9 @@ This file is located in the 'templates' directory.
 This will start the Flask server on http://localhost:5000/ or http://127.0.0.1:5000/, 
 where you can upload audio files and receive the analysis results.
 
+5. Audio samples can be found in the "Audio Examples" directory.
+**Audio file must be .wav format**
+
 ## Other Notes
 - The yamnet_class_map.csv file is included for convenience. 
 The latest version can be found on the official TensorFlow Models repository: https://github.com/tensorflow/models/blob/master/research/audioset/yamnet/yamnet_class_map.csv
