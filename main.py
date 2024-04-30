@@ -89,10 +89,10 @@ def analyze_endpoint():
     audio, sampling_rate = librosa.load(audio_file_in_memory, sr=16000)  # Load directly with desired sample rate
 
     # Define thresholds and target length for audio processing. These thresholds are used to omit low background noises
-    min_rms_threshold = 0.01
+    min_rms_threshold = 0.015
     min_pitch_prob_threshold = 0.005
     target_length = 16000  # One second of audio
-    intervals = librosa.effects.split(audio, top_db=37)
+    intervals = librosa.effects.split(audio, top_db=35)
 
     # We call our main analyze function
     results = analyze_segments(audio, intervals, sampling_rate, class_names, label_groups, special_labels, model, target_length, min_rms_threshold, min_pitch_prob_threshold)
